@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja de Games</title>
+    <h1>Games</h1>
+    <ul id="game">
+    </ul>
+    <hr>
+    <h1>Create Game</h1>
+    <input type="text" placeholder="Nome" id="nome" name="nome"><br>
+    <input type="number" placeholder="Preço" id="preco" name="preco"><br>
+    <button type="button" onclick="createGame()">Cadastrar</button>
+    <hr>
+    <h1>Edit Game</h1>
+    <input type="text" placeholder="Id" id="EditId" name="id" readonly><br>
+    <input type="text" placeholder="Nome" id="EditNome" name="nome"><br>
+    <input type="number" placeholder="Preço" id="EditPreco" name="preco"><br>
+    <button type="button" onclick="gameEdit()">Editar</button>
+</head>
+<body>
+    
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+
+        function deleteGame(item){
+            let id = item.getAttribute('data-id')
+                   axios.delete('http://localhost:3000/game/'+id).then(resp=>{
+                      alert('Game deletado')
+                }).catch(err=>{
+                       err
+            })
+        }
+
+        function createGame(){
+            let nomeInput = document.getElementById('nome')
+            let precoInput = document.getElementById('preco')
+
+            let game = {
+                nome:nomeInput.value,
+                preco:precoInput.value
+            }
+
+            axios.post('http://localhost:3000/game',game).then(resposta=>{
+    
+                    alert('Game Cadastro')
+            }).catch(err=>{
+                err
+            })
+        }
+
+        function gameLoad(item){
+            let id = item.getAttribute('data-id')
+            let nome = item.getAttribute('data-nome')
+            let preco = item.getAttribute('data-preco')
+
+            let EditId = document.getElementById('EditId')
+            let EditNome = document.getElementById('EditNome')
+            let EditPreco = document.getElementById('EditPreco')
+            EditId.value = id
+            EditNome.value = nome
+            EditPreco.value = preco
+        }
+
+        function gameEdit(){
+            let nomeEditInput = document.getElementById('EditNome')
+            let precoEditInput = document.getElementById('EditPreco')
+
+            let game = {
+                nome:nomeEditInput.value,
+                preco:precoEditInput.value
+            }
+
+            let editId = document.getElementById('EditId').value
+            axios.put('http://localhost:3000/game/'+editId,game).then(resp=>{
+                alert('Game Atualizado')
+            }).catch(err=>{
+                err
+            })
+        }
+
+       axios.get('http://localhost:3000/games').then(games=>{
+           let game = games.data
+           let lista = document.getElementById('game')
+
+            game.forEach(games=>{
+                let item = document.createElement('li')
+
+                item.setAttribute('data-id',games.id)
+                item.setAttribute('data-nome',games.nome)
+                item.setAttribute('data-preco',games.preco)
+                
+                item.innerHTML = `${games.id} ${games.nome} ${games.preco}`
+                lista.appendChild(item)
+
+                let deleteBtn = document.createElement('button')
+                deleteBtn.innerHTML = 'Deletar'
+                lista.appendChild(deleteBtn)
+
+                let editBtn = document.createElement('button')
+                editBtn.innerHTML = 'Editar'
+                lista.appendChild(editBtn)
+
+                deleteBtn.addEventListener('click',function(){
+                    deleteGame(item)
+                })
+
+                editBtn.addEventListener('click',function(){
+                    gameLoad(item)
+                })
+
+            })
+       }).catch(err=>{
+           console.log(err)
+       })
+    </script>
+</body>
+</html>
